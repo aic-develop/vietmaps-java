@@ -7,11 +7,11 @@ import androidx.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.mapbox.api.geocoding.v5.GeocodingCriteria.GeocodingTypeCriteria;
 import com.mapbox.api.geocoding.v5.models.GeocodingAdapterFactory;
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
 import com.mapbox.core.MapboxService;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.core.utils.ApiCallHelper;
 import com.mapbox.core.utils.MapboxUtils;
@@ -61,8 +61,19 @@ import retrofit2.Response;
  * @since 1.0.0
  */
 @AutoValue
-public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, GeocodingService> {
-  private Call<List<GeocodingResponse>> batchCall;
+public abstract class MapboxGeocoding extends MapboxService<JsonObject, GeocodingService> {
+
+  private static final String GEO_CODERS_PATH_1 = "geocoders";
+  private static final String GEO_CODERS_PATH_2 = "q";
+
+  private static final String REVERSE_GEO_CODERS_PATH_1 = "v1.0.0";
+  private static final String REVERSE_GEO_CODERS_PATH_2 = "reverse-geocoders";
+
+  private Call<List<JsonObject>> batchCall;
+
+  private boolean isReverse;
+  private Point reversePoint;
+  private BoundingBox boundingBox;
 
   protected MapboxGeocoding() {
     super(GeocodingService.class);
@@ -78,16 +89,19 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
   }
 
   @Override
-  protected Call<GeocodingResponse> initializeCall() {
+  protected Call<JsonObject> initializeCall() {
     if (mode().contains(GeocodingCriteria.MODE_PLACES_PERMANENT)) {
       throw new IllegalArgumentException("Use getBatchCall() for batch calls.");
     }
 
     return getService().getCall(
       ApiCallHelper.getHeaderUserAgent(clientAppName()),
+      "Bearer " + accessToken(),
+      isReverse ? REVERSE_GEO_CODERS_PATH_1 : GEO_CODERS_PATH_1,
+      isReverse ? REVERSE_GEO_CODERS_PATH_2 : GEO_CODERS_PATH_2,
       mode(),
-      query(),
-      accessToken(),
+      isReverse ? query() : query() + ".json",
+//      accessToken(),
       country(),
       proximity(),
       geocodingTypes(),
@@ -96,10 +110,19 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
       limit(),
       languages(),
       reverseMode(),
-      fuzzyMatch());
+      fuzzyMatch(),
+      "json",
+      reversePoint == null ? null : reversePoint.latitude(),
+      reversePoint == null ? null : reversePoint.longitude(),
+      null,
+      boundingBox == null ? null : boundingBox.north(),
+      boundingBox == null ? null : boundingBox.west(),
+      boundingBox == null ? null : boundingBox.south(),
+      boundingBox == null ? null : boundingBox.east()
+    );
   }
 
-  private Call<List<GeocodingResponse>> getBatchCall() {
+  private Call<List<JsonObject>> getBatchCall() {
     // No need to recreate it
     if (batchCall != null) {
       return batchCall;
@@ -111,9 +134,12 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
 
     batchCall = getService().getBatchCall(
       ApiCallHelper.getHeaderUserAgent(clientAppName()),
+      "Bearer " + accessToken(),
+      isReverse ? REVERSE_GEO_CODERS_PATH_1 : GEO_CODERS_PATH_1,
+      isReverse ? REVERSE_GEO_CODERS_PATH_2 : GEO_CODERS_PATH_2,
       mode(),
-      query(),
-      accessToken(),
+      isReverse ? query() : query() + ".json",
+//      accessToken(),
       country(),
       proximity(),
       geocodingTypes(),
@@ -122,7 +148,16 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
       limit(),
       languages(),
       reverseMode(),
-      fuzzyMatch());
+      fuzzyMatch(),
+      "json",
+      reversePoint == null ? null : reversePoint.latitude(),
+      reversePoint == null ? null : reversePoint.longitude(),
+      null,
+      boundingBox == null ? null : boundingBox.north(),
+      boundingBox == null ? null : boundingBox.west(),
+      boundingBox == null ? null : boundingBox.south(),
+      boundingBox == null ? null : boundingBox.east()
+    );
 
     return batchCall;
   }
@@ -135,7 +170,7 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
    * @throws IOException Signals that an I/O exception of some sort has occurred.
    * @since 1.0.0
    */
-  public Response<List<GeocodingResponse>> executeBatchCall() throws IOException {
+  public Response<List<JsonObject>> executeBatchCall() throws IOException {
     return getBatchCall().execute();
   }
 
@@ -148,7 +183,7 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
    * @param callback a {@link Callback} which is used once the {@link GeocodingResponse} is created.
    * @since 1.0.0
    */
-  public void enqueueBatchCall(Callback<List<GeocodingResponse>> callback) {
+  public void enqueueBatchCall(Callback<List<JsonObject>> callback) {
     getBatchCall().enqueue(callback);
   }
 
@@ -168,11 +203,11 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
    * @return cloned call
    * @since 1.0.0
    */
-  public Call<List<GeocodingResponse>> cloneBatchCall() {
+  public Call<List<JsonObject>> cloneBatchCall() {
     return getBatchCall().clone();
   }
 
-  @NonNull
+  @Nullable
   abstract String query();
 
   @NonNull
@@ -225,7 +260,7 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
    */
   public static Builder builder() {
     return new AutoValue_MapboxGeocoding.Builder()
-      .baseUrl(Constants.BASE_API_URL)
+      .baseUrl("https://api.vietmaps.vn")
       .mode(GeocodingCriteria.MODE_PLACES);
   }
 
@@ -252,6 +287,9 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
 
     private List<String> intersectionStreets = new ArrayList<>();
 
+    private Point queryPoint;
+    private BoundingBox boundingBox;
+
     /**
      * Perform a reverse geocode on the provided {@link Point}. Only one point can be passed in as
      * the query and isn't guaranteed to return a result. If you
@@ -263,9 +301,11 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
      * @since 3.0.0
      */
     public Builder query(@NonNull Point point) {
-      query(String.format(Locale.US, "%s,%s",
-        TextUtils.formatCoordinate(point.longitude()),
-        TextUtils.formatCoordinate(point.latitude())));
+      queryPoint = point;
+      query("");
+//      query(String.format(Locale.US, "%s,%s",
+//        TextUtils.formatCoordinate(point.longitude()),
+//        TextUtils.formatCoordinate(point.latitude())));
       return this;
     }
 
@@ -279,7 +319,7 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
      * @return this builder for chaining options together
      * @since 3.0.0
      */
-    public abstract Builder query(@NonNull String query);
+    public abstract Builder query(@Nullable String query);
 
     /**
      * This sets the kind of geocoding result you desire, either ephemeral geocoding or batch
@@ -399,8 +439,9 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
      * @since 4.7.0
      */
     public Builder bbox(BoundingBox bbox) {
-      bbox(bbox.southwest().longitude(), bbox.southwest().latitude(),
-           bbox.northeast().longitude(), bbox.northeast().latitude());
+      boundingBox = bbox;
+//      bbox(bbox.southwest().longitude(), bbox.southwest().latitude(),
+//           bbox.northeast().longitude(), bbox.northeast().latitude());
       return this;
     }
 
@@ -627,9 +668,9 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
       if (!MapboxUtils.isAccessTokenValid(geocoding.accessToken())) {
         throw new ServicesException("Using Mapbox Services requires setting a valid access token.");
       }
-      if (geocoding.query().isEmpty()) {
-        throw new ServicesException("A query with at least one character or digit is required.");
-      }
+//      if (geocoding.query().isEmpty()) {
+//        throw new ServicesException("A query with at least one character or digit is required.");
+//      }
 
       if (geocoding.reverseMode() != null
         && geocoding.limit() != null && !geocoding.limit().equals("1")) {
@@ -651,6 +692,14 @@ public abstract class MapboxGeocoding extends MapboxService<GeocodingResponse, G
           throw new ServicesException("Geocoding proximity must be set for intersection search.");
         }
       }
+      if (queryPoint != null) {
+        geocoding.isReverse = true;
+        geocoding.reversePoint = queryPoint;
+      }
+      if (boundingBox != null) {
+        geocoding.boundingBox = boundingBox;
+      }
+      geocoding.enableDebug(true);
       return geocoding;
     }
   }

@@ -1,6 +1,8 @@
 package com.mapbox.api.geocoding.v5.models;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -71,7 +73,7 @@ public abstract class GeocodingResponse implements Serializable {
    * @return a list containing the original query
    * @since 1.0.0
    */
-  @NonNull
+  @Nullable
   public abstract List<String> query();
 
   /**
@@ -92,7 +94,7 @@ public abstract class GeocodingResponse implements Serializable {
    * @return information about Mapbox's terms of service and the data sources
    * @since 1.0.0
    */
-  @NonNull
+  @Nullable
   public abstract String attribution();
 
   /**

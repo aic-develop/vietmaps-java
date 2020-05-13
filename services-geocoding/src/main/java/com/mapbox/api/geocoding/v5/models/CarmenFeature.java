@@ -152,6 +152,7 @@ public abstract class CarmenFeature implements GeoJson {
    * @since 1.0.0
    */
   @Nullable
+  @SerializedName("text_en-US")
   public abstract String text();
 
   /**

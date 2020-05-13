@@ -16,7 +16,6 @@ import com.mapbox.api.directions.v5.DirectionsCriteria.VoiceUnitCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.core.MapboxService;
-import com.mapbox.core.constants.Constants;
 import com.mapbox.core.exceptions.ServicesException;
 import com.mapbox.core.utils.ApiCallHelper;
 import com.mapbox.core.utils.MapboxUtils;
@@ -85,6 +84,7 @@ public abstract class MapboxDirections extends
   private Call<DirectionsResponse> get() {
     return getService().getCall(
       ApiCallHelper.getHeaderUserAgent(clientAppName()),
+     "Bearer " + accessToken(),
       user(),
       profile(),
       formatCoordinates(coordinates()),
@@ -94,9 +94,9 @@ public abstract class MapboxDirections extends
       overview(),
       radius(),
       steps(),
-      bearing(),
+//      bearing(),
       continueStraight(),
-      annotation(),
+//      annotation(),
       language(),
       roundaboutExits(),
       voiceInstructions(),
@@ -117,6 +117,7 @@ public abstract class MapboxDirections extends
   private Call<DirectionsResponse> post() {
     return getService().postCall(
       ApiCallHelper.getHeaderUserAgent(clientAppName()),
+      "Bearer " + accessToken(),
       user(),
       profile(),
       formatCoordinates(coordinates()),
@@ -385,7 +386,7 @@ public abstract class MapboxDirections extends
    */
   public static Builder builder() {
     return new AutoValue_MapboxDirections.Builder()
-      .baseUrl(Constants.BASE_API_URL)
+      .baseUrl("https://routing.vietmaps.vn")
       .profile(DirectionsCriteria.PROFILE_DRIVING)
       .user(DirectionsCriteria.PROFILE_DEFAULT_USER)
       .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6);
@@ -977,10 +978,9 @@ public abstract class MapboxDirections extends
       waypointIndices(TextUtils.join(";", waypointIndices));
 
       MapboxDirections directions = autoBuild();
-
+//      directions.enableDebug(true);
       if (!MapboxUtils.isAccessTokenValid(directions.accessToken())) {
-        throw new ServicesException("Using Mapbox Services requires setting a valid access"
-          + " token.");
+        throw new ServicesException("Using Mapbox Services requires setting a valid access token.");
       }
       return directions;
     }

@@ -7,7 +7,7 @@ apply from: file('../gradle/artifact-settings.gradle')
 
 publishing {
     publications {
-        MapboxJavaSDKPublication(MavenPublication) {
+        VietmapsJavaSDKPublication(MavenPublication) {
             from components.java
             groupId project.ext.mapboxArtifactGroupId
             artifactId project.ext.mapboxArtifactId
@@ -35,14 +35,14 @@ publishing {
                 final developerNode = mainNode.appendNode('developers').appendNode('developer')
                 developerNode.appendNode('id', project.ext.mapboxDeveloperId)
                 developerNode.appendNode('name', project.ext.mapboxDeveloperName)
-                developerNode.appendNode('email', project.ext.mapboxDeveloperEmail)
-                developerNode.appendNode('organization', project.ext.mapboxDeveloperOrganization)
-                developerNode.appendNode('organizationUrl', project.ext.mapboxDeveloperOrganizationUrl)
+//                developerNode.appendNode('email', project.ext.mapboxDeveloperEmail)
+//                developerNode.appendNode('organization', project.ext.mapboxDeveloperOrganization)
+//                developerNode.appendNode('organizationUrl', project.ext.mapboxDeveloperOrganizationUrl)
 
-                final scmNode = mainNode.appendNode("scm")
-                scmNode.appendNode("connection", project.ext.mapboxArtifactScmUrl)
-                scmNode.appendNode("developerConnection", project.ext.mapboxArtifactScmUrl)
-                scmNode.appendNode("url", project.ext.mapboxArtifactUrl)
+//                final scmNode = mainNode.appendNode("scm")
+//                scmNode.appendNode("connection", project.ext.mapboxArtifactScmUrl)
+//                scmNode.appendNode("developerConnection", project.ext.mapboxArtifactScmUrl)
+//                scmNode.appendNode("url", project.ext.mapboxArtifactUrl)
             }
 
         }
@@ -52,25 +52,26 @@ publishing {
 bintray {
     user = mapboxBintrayUser
     key = mapboxBintrayApiKey
-    publications('MapboxJavaSDKPublication')
+    publications('VietmapsJavaSDKPublication')
+    override = true
     pkg {
         repo = project.ext.mapboxBintrayRepoName
         name = project.ext.mapboxArtifactId
         userOrg = project.ext.mapboxBintrayUserOrg
         licenses = [project.ext.mapboxArtifactLicenseName]
         vcsUrl = project.ext.mapboxArtifactVcsUrl
-        publish = false
+        publish = true
         version {
             name = project.ext.versionName
             desc = project.ext.mapboxArtifactDescription
             released = new Date()
-            gpg {
-                sign = true
-                passphrase = mapboxGpgPassphrase
-            }
-            mavenCentralSync {
-                sync = false
-            }
+//            gpg {
+//                sign = true
+//                passphrase = mapboxGpgPassphrase
+//            }
+//            mavenCentralSync {
+//                sync = false
+//            }
         }
     }
 }

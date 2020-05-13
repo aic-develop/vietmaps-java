@@ -17,7 +17,7 @@ public final class DirectionsCriteria {
    *
    * @since 1.0.0
    */
-  public static final String PROFILE_DEFAULT_USER = "mapbox";
+  public static final String PROFILE_DEFAULT_USER = "";
 
   /**
    * For car and motorcycle routing. This profile factors in current and historic traffic
@@ -25,7 +25,7 @@ public final class DirectionsCriteria {
    *
    * @since 2.0.0
    */
-  public static final String PROFILE_DRIVING_TRAFFIC = "driving-traffic";
+  public static final String PROFILE_DRIVING_TRAFFIC = "driving";
 
   /**
    * For car and motorcycle routing. This profile shows the fastest routes by preferring

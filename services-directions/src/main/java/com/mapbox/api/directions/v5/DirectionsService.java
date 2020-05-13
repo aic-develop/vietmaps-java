@@ -32,14 +32,14 @@ public interface DirectionsService {
    * @param overview            route full, simplified, etc.
    * @param radiuses            start at the most efficient point within the radius
    * @param steps               define if you'd like the route steps
-   * @param bearings            used to filter the road segment the waypoint will be placed on by
-   *                            direction and dictates the angle of approach
+//   * @param bearings            used to filter the road segment the waypoint will be placed on by
+//   *                            direction and dictates the angle of approach
    * @param continueStraight    define whether the route should continue straight even if the
    *                            route will be slower
-   * @param annotations         an annotations object that contains additional details about each
-   *                            line segment along the route geometry. Each entry in an
-   *                            annotations field corresponds to a coordinate along the route
-   *                            geometry
+//   * @param annotations         an annotations object that contains additional details about each
+//   *                            line segment along the route geometry. Each entry in an
+//   *                            annotations field corresponds to a coordinate along the route
+//   *                            geometry
    * @param language            language of returned turn-by-turn text instructions
    * @param roundaboutExits     Add extra step when roundabouts occur with additional information
    *                            for the user
@@ -62,9 +62,10 @@ public interface DirectionsService {
    * @return the {@link DirectionsResponse} in a Call wrapper
    * @since 1.0.0
    */
-  @GET("directions/v5/{user}/{profile}/{coordinates}")
+  @GET("route/v1{user}/{profile}/{coordinates}")
   Call<DirectionsResponse> getCall(
     @Header("User-Agent") String userAgent,
+    @Header("Authorization") String accessTokenHeader,
     @Path("user") String user,
     @Path("profile") String profile,
     @Path("coordinates") String coordinates,
@@ -74,9 +75,9 @@ public interface DirectionsService {
     @Query("overview") String overview,
     @Query("radiuses") String radiuses,
     @Query("steps") Boolean steps,
-    @Query("bearings") String bearings,
+//    @Query("bearings") String bearings,
     @Query("continue_straight") Boolean continueStraight,
-    @Query("annotations") String annotations,
+//    @Query("annotations") String annotations,
     @Query("language") String language,
     @Query("roundabout_exits") Boolean roundaboutExits,
     @Query("voice_instructions") Boolean voiceInstructions,
@@ -138,9 +139,10 @@ public interface DirectionsService {
    * @since 4.6.0
    */
   @FormUrlEncoded
-  @POST("directions/v5/{user}/{profile}")
+  @POST("route/v1{user}/{profile}")
   Call<DirectionsResponse> postCall(
     @Header("User-Agent") String userAgent,
+    @Header("Authorization") String accessTokenHeader,
     @Path("user") String user,
     @Path("profile") String profile,
     @Field("coordinates") String coordinates,

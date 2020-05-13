@@ -1,5 +1,6 @@
 package com.mapbox.api.geocoding.v5;
 
+import com.google.gson.JsonObject;
 import com.mapbox.api.geocoding.v5.models.GeocodingResponse;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public interface GeocodingService {
    * @param mode         mapbox.places or mapbox.places-permanent for batch and permanent geocoding.
    * @param query        a location; a place name for forward geocoding or a coordinate pair
    *                     (longitude, latitude location) for reverse geocoding
-   * @param accessToken  Mapbox access token.
+//   * @param accessToken  Mapbox access token.
    * @param country      ISO 3166 alpha 2 country codes, separated by commas.
    * @param proximity    Location around which to bias results.
    * @param types        Filter results by one or more type.
@@ -38,12 +39,15 @@ public interface GeocodingService {
    * @return A retrofit Call object
    * @since 1.0.0
    */
-  @GET("/geocoding/v5/{mode}/{query}.json")
-  Call<GeocodingResponse> getCall(
+  @GET("/search/{dynamicPath1}/{dynamicPath2}{mode}/{query}")
+  Call<JsonObject> getCall(
     @Header("User-Agent") String userAgent,
+    @Header("Authorization") String accessTokenHeader,
+    @Path("dynamicPath1") String path1,
+    @Path("dynamicPath2") String path2,
     @Path("mode") String mode,
     @Path("query") String query,
-    @Query("access_token") String accessToken,
+//    @Query("access_token") String accessToken,
     @Query("country") String country,
     @Query("proximity") String proximity,
     @Query("types") String types,
@@ -52,7 +56,15 @@ public interface GeocodingService {
     @Query("limit") String limit,
     @Query("language") String language,
     @Query("reverseMode") String reverseMode,
-    @Query("fuzzyMatch") Boolean fuzzyMatch);
+    @Query("fuzzyMatch") Boolean fuzzyMatch,
+    @Query("format") String format,
+    @Query("lat") Double lat,
+    @Query("lon") Double lon,
+    @Query("zoom") Integer zoom,
+    @Query("bbox.top") Double bboxTop,
+    @Query("bbox.left") Double bboxLeft,
+    @Query("bbox.bottom") Double bboxBottom,
+    @Query("bbox.right") Double bboxRight);
 
   /**
    * Constructs the html call using the information passed in through the
@@ -62,7 +74,7 @@ public interface GeocodingService {
    * @param mode         mapbox.places-permanent for batch geocoding.
    * @param query        a location; a place name for forward geocoding or a coordinate pair
    *                     (longitude, latitude location) for reverse geocoding
-   * @param accessToken  Mapbox access token.
+//   * @param accessToken  Mapbox access token.
    * @param country      ISO 3166 alpha 2 country codes, separated by commas.
    * @param proximity    Location around which to bias results.
    * @param types        Filter results by one or more type.
@@ -75,12 +87,15 @@ public interface GeocodingService {
    * @return A retrofit Call object
    * @since 1.0.0
    */
-  @GET("/geocoding/v5/{mode}/{query}.json")
-  Call<List<GeocodingResponse>> getBatchCall(
+  @GET("/search/{dynamicPath1}/{dynamicPath2}{mode}/{query}.json")
+  Call<List<JsonObject>> getBatchCall(
     @Header("User-Agent") String userAgent,
+    @Header("Authorization") String accessTokenHeader,
+    @Path("dynamicPath1") String path1,
+    @Path("dynamicPath2") String path2,
     @Path("mode") String mode,
     @Path("query") String query,
-    @Query("access_token") String accessToken,
+//    @Query("access_token") String accessToken,
     @Query("country") String country,
     @Query("proximity") String proximity,
     @Query("types") String types,
@@ -89,5 +104,14 @@ public interface GeocodingService {
     @Query("limit") String limit,
     @Query("language") String language,
     @Query("reverseMode") String reverseMode,
-    @Query("fuzzyMatch") Boolean fuzzyMatch);
+    @Query("fuzzyMatch") Boolean fuzzyMatch,
+    @Query("format") String format,
+    @Query("lat") Double lat,
+    @Query("lon") Double lon,
+    @Query("zoom") Integer zoom,
+    @Query("bbox.top") Double bboxTop,
+    @Query("bbox.left") Double bboxLeft,
+    @Query("bbox.bottom") Double bboxBottom,
+    @Query("bbox.right") Double bboxRight);
+
 }
